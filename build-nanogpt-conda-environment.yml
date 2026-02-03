@@ -1,0 +1,23 @@
+name: build-nanogpt
+channels:
+  - pytorch
+  - nvidia
+  - defaults
+dependencies:
+  - python=3.10
+  - pytorch
+  - torchvision
+  - torchaudio
+  - pytorch-cuda=11.8
+  - numpy
+  - pip
+  - pip:
+    - transformers
+    - datasets
+    - tiktoken
+    - peft
+    - accelerate
+    - scikit-learn
+    - matplotlib
+    - ipykernel
+    - jupyter
