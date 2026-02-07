@@ -114,9 +114,9 @@ tokenizer.save_pretrained("./lora_model_final")
 def department_prediction(subject,body):
     prompt = prompt_format(subject,body,None)
     inputs = tokenizer(prompt, return_tensors="pt", truncation=True, max_length=512).to(device)
-    outputs = model.generate(**inputs,max_new_tokens=15, pad_token_id=tokenizer.eos_token_id,do_sample=False)
+    outputs = model.generate(**inputs,max_new_tokens=15, pad_token_id=tokenizer.eos_token_id, do_sample=False)
     generated = tokenizer.decode(outputs[0], skip_special_tokens=True)
-    marker = "Best matching department:"
+    marker = "Department:"
     if marker.lower() in generated.lower():
         answer = generated.lower().split(marker.lower())[-1].strip()
     else:
