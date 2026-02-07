@@ -5,12 +5,8 @@ from transformers import AutoModelForSequenceClassification, AutoTokenizer, Trai
 from datapreparation import load_and_prepare_data
 from sklearn.metrics import accuracy_score
 
-
-device = "cuda" if torch.cuda.is_available() else "cpu"
-tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased")
-
 def tokenize_function(elem):
-    text_pairs = [s + " " + b for s, b in zip(elem["subject"], elem["body"])]
+    text_pairs = [str(s) + " " + str(b) for s, b in zip(elem["subject"], elem["body"])]
 
     return tokenizer(
         text_pairs,
@@ -18,8 +14,16 @@ def tokenize_function(elem):
         truncation = True,
         max_length = 512 # BERT standard constraint
     )
-
+"""
+ >>>> Mapping string labels --> int
+"Technical Support" == 0
+"Customer Service" == 1
+"Billing and Payments" == 2
+"Sales and Pre-Sales" == 3
+"General Inquiry" == 4
+"""
 def map_labels(elem):
+    
     elem["labels"] = label2id[elem["queue"]]
     return elem
 
@@ -29,22 +33,35 @@ def compute_metrics(eval_pred):
     return {"accuracy": accuracy_score(labels, predictions)}
     
 
-model = AutoModelForSequenceClassification.from_pretrained (
-    "distilbert-base-uncased",
-    num_labels=5
-)
-model.to(device)
+device = "cuda" if torch.cuda.is_available() else "cpu"
 
+# Here we load the DistilBERT tokenizer
+tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased")
+
+print("Loading data...")
 train, val, test, label_list, label2id, id2label = load_and_prepare_data()
 
+print("Dataset mapping...")
 train = train.map(map_labels)
 val = val.map(map_labels)
 test = test.map(map_labels)
 
+print("\nTokenize...")
+# Text --> Tensor
 tokenized_train = train.map(tokenize_function, batched=True)
 tokenized_val = val.map(tokenize_function, batched=True)
 tokenized_test = test.map(tokenize_function, batched=True)
 
+print("Loading model...")
+model = AutoModelForSequenceClassification.from_pretrained (
+    "distilbert-base-uncased",
+    num_labels=5,
+    id2label=id2label,
+    label2id=label2id
+)
+model.to(device)
+
+# --- TRAINING PART ---
 args = TrainingArguments(
     output_dir="distilbert-classifier",
     num_train_epochs=3,
