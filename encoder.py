@@ -1,6 +1,7 @@
 import torch
 import tiktoken
 import numpy as np
+import time
 from transformers import AutoModelForSequenceClassification, AutoTokenizer, Trainer, TrainingArguments
 from datapreparation import load_and_prepare_data
 from sklearn.metrics import accuracy_score
@@ -83,12 +84,15 @@ trainer = Trainer(
 )
 
 print("\nStarting training...")
+time_start = time.time()
 trainer.train()
+train_time = time.time() - time_start
+print(f"\nTraining completed in {train_time:.2f} seconds ({train_time / 60:.2f}) minutes")
 
 print("\n ==== EVALUTAION METRICS ====")
 test_results = trainer.evaluate(tokenized_test)
-print(f"Accuracy: {test_results['eval_accuracy']}")
+print(f"Accuracy on test dataset: {test_results['eval_accuracy']}")
 
 trainer.save_model("my_final_bert_classifier")
-print("Modello salvato in 'my_final_bert_classifier'")
+print("Model saved in 'my_final_bert_classifier'")
 
