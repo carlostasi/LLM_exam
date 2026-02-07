@@ -64,10 +64,14 @@ model.to(device)
 # --- TRAINING PART ---
 args = TrainingArguments(
     output_dir="distilbert-classifier",
-    num_train_epochs=3,
+    num_train_epochs=1,
     per_device_eval_batch_size=16,
-    evaluation_strategy="epoch",
+    per_device_train_batch_size=16,
+    eval_strategy="epoch",
+    save_strategy="epoch",
     learning_rate=2e-5,
+    load_best_model_at_end=True,
+    metric_for_best_model="accuracy"
 )
 
 trainer = Trainer(
@@ -77,3 +81,14 @@ trainer = Trainer(
     eval_dataset = tokenized_val,
     compute_metrics = compute_metrics
 )
+
+print("\nStarting training...")
+trainer.train()
+
+print("\n ==== EVALUTAION METRICS ====")
+test_results = trainer.evaluate(tokenized_test)
+print(f"Accuracy: {test_results['eval_accuracy']}")
+
+trainer.save_model("my_final_bert_classifier")
+print("Modello salvato in 'my_final_bert_classifier'")
+
