@@ -17,32 +17,6 @@ from datasets import concatenate_datasets
 train_ds, val_ds, test_ds, label_list, label2id, id2label = datapreparation.load_and_prepare_data()
 print("Original Training size:", len(train_ds))
 
-# under and over sampling
-tech_support = train_ds.filter(lambda x: x['queue'] == 'Technical Support')
-customer_service = train_ds.filter(lambda x: x['queue'] == 'Customer Service')
-billing = train_ds.filter(lambda x: x['queue'] == 'Billing and Payments')
-sales = train_ds.filter(lambda x: x['queue'] == 'Sales and Pre-Sales')
-inquiry = train_ds.filter(lambda x: x['queue'] == 'General Inquiry')
-
-tech_support = tech_support.shuffle(seed=42).select(range(3000))
-
-sales_boost = concatenate_datasets([sales] * 4)
-
-inquiry_boost = concatenate_datasets([inquiry] * 8)
-
-balanced_train_ds = concatenate_datasets([
-    tech_support,
-    customer_service,
-    billing,
-    sales_boost,
-    inquiry_boost
-])
-
-balanced_train_ds = balanced_train_ds.shuffle(seed=42)
-
-print("Balanced Training size:", len(balanced_train_ds))
-train_ds = balanced_train_ds
-
 # Check device
 device = "cuda" if torch.cuda.is_available() else "cpu"
 print(f"Using device: {device}")
