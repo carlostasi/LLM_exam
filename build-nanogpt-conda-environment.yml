@@ -21,3 +21,6 @@ dependencies:
     - matplotlib
     - ipykernel
     - jupyter
+    - matplotlib
+    - numpy
+    - pandas
