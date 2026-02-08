@@ -1,0 +1,5 @@
+Model_name,Balanced/Unblanced,Accuracy(%),Training_Time(min)
+GPT2+_loRa,unbalanced,63.61,10.9
+DistilGPT2+_loRa,unbalanced,65.48,9.7
+GPT2+_loRa,balanced,48.40,15.2
+DistilGPT2+_loRa,balanced,50.03,14.1
