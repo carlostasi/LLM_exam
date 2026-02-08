@@ -1,0 +1,8 @@
+Model_name,Accuracy
+GPT2_prompting
+DistilGPT2_prompting
+GPT2_loRa,63.61
+DistilGPT2_lora,65.48
+GPT2_loRa_balanced,48.40
+DistilGPT2_lora_balanced,50.03
+Distil_BERT,82.92
