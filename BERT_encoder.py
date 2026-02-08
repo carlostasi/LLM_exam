@@ -6,7 +6,14 @@ from transformers import AutoModelForSequenceClassification, AutoTokenizer, Trai
 from datapreparation import load_and_prepare_data
 from sklearn.metrics import accuracy_score
 
+
 def tokenize_function(elem):
+    """
+    This function takes an input 'elem', then creates a list of text pairs by combining 
+    the elements of elem["subject"] and elem["body"] as strings.
+    Then it uses the 'tokenizer' to tokenize the text pairs.
+    Returns: the result of the tokenizer descpription
+    """
     text_pairs = [str(s) + " " + str(b) for s, b in zip(elem["subject"], elem["body"])]
 
     return tokenizer(
@@ -15,16 +22,16 @@ def tokenize_function(elem):
         truncation = True,
         max_length = 512 # BERT standard constraint
     )
-"""
- >>>> Mapping string labels --> int
-"Technical Support" == 0
-"Customer Service" == 1
-"Billing and Payments" == 2
-"Sales and Pre-Sales" == 3
-"General Inquiry" == 4
-"""
+
 def map_labels(elem):
-    
+    """
+    >>>> Mapping string labels --> int
+    "Technical Support" == 0
+    "Customer Service" == 1
+    "Billing and Payments" == 2
+    "Sales and Pre-Sales" == 3
+    "General Inquiry" == 4
+    """
     elem["labels"] = label2id[elem["queue"]]
     return elem
 
@@ -33,7 +40,6 @@ def compute_metrics(eval_pred):
     predictions = np.argmax(logits, axis=-1)
     return {"accuracy": accuracy_score(labels, predictions)}
     
-
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 # Here we load the DistilBERT tokenizer
@@ -62,17 +68,20 @@ model = AutoModelForSequenceClassification.from_pretrained (
 )
 model.to(device)
 
-# --- TRAINING PART ---
+# --- TRAINING CONFIGURATION ---
 args = TrainingArguments(
     output_dir="distilbert-classifier",
-    num_train_epochs=1,
+    num_train_epochs=5,
     per_device_eval_batch_size=16,
     per_device_train_batch_size=16,
+    # Evaluation and store of every epoch
     eval_strategy="epoch",
     save_strategy="epoch",
+    # Use of a low learning rate to don't destroy the pre-trained knowledge of BERT
     learning_rate=2e-5,
+    # Here we have the reload of the weights of the model that had the best accuracy
     load_best_model_at_end=True,
-    metric_for_best_model="accuracy"
+    metric_for_best_model="accuracy" # We could choose also "eval_loss"
 )
 
 trainer = Trainer(
@@ -89,7 +98,8 @@ trainer.train()
 train_time = time.time() - time_start
 print(f"\nTraining completed in {train_time:.2f} seconds ({train_time / 60:.2f}) minutes")
 
-print("\n ==== EVALUTAION METRICS ====")
+print("\n ==== EVALUATION METRICS ====")
+# Evaluation on test dataset (data that the model had never seen before)
 test_results = trainer.evaluate(tokenized_test)
 print(f"Accuracy on test dataset: {test_results['eval_accuracy']}")
 
