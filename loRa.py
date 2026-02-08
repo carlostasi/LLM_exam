@@ -3,25 +3,49 @@ from transformers import (AutoTokenizer,  AutoModelForCausalLM, TrainingArgument
 from peft import LoraConfig, get_peft_model, TaskType, PeftModel
 from tqdm import tqdm
 import time
+import numpy as np
 from datapreparation import load_and_prepare_data
 import datapreparation 
 from datasets import concatenate_datasets
-
+from sklearn.metrics import accuracy_score
 
 # 1. Load Data using the provided function 
 train_ds, val_ds, test_ds, label_list, label2id, id2label = datapreparation.load_and_prepare_data()
 print("Original Training size:", len(train_ds))
 #balanced dataset
-def get_balanced_dataset(input_ds, num_samples=3000):
-    tech_support = input_ds.filter(lambda x: x['queue'] == 'Technical Support')
-    others = input_ds.filter(lambda x: x['queue'] != 'Technical Support')
-    tech_support = tech_support.shuffle(seed=42).select(range(num_samples))
-    balanced_train_ds = concatenate_datasets([tech_support, others])
-    balanced_train_ds = balanced_train_ds.shuffle(seed=42)
-    return balanced_train_ds
+def get_balanced_dataset(input_ds, target_size):
+    # Divide the classes
+    ds_dict = {}
+    for label in label_list:
+        ds_dict[label] = input_ds.filter(lambda x: x['queue'] == label)
+    
+    datasets_to_concat = []
+    
+    for label, ds in ds_dict.items():
+        count = len(ds)
+        if count == 0: continue
+        
+        # Se la classe è gigante (Technical Support), ne prendiamo solo un tot
+        if count > target_size:
+            ds = ds.shuffle(seed=42).select(range(target_size))
+            datasets_to_concat.append(ds)
+        # Se la classe è piccola (General Inquiry), la moltiplichiamo
+        else:
+            # Calcola quante volte duplicare per arrivare circa a target_size
+            repeat_count = (target_size // count) + 1
+            # Duplica e concatena
+            augmented = concatenate_datasets([ds] * repeat_count)
+            # Taglia l'eccesso per averle tutte uguali
+            augmented = augmented.shuffle(seed=42).select(range(target_size))
+            datasets_to_concat.append(augmented)
+            
+    # Unisci tutto
+    final_ds = concatenate_datasets(datasets_to_concat)
+    return final_ds.shuffle(seed=42)
 
 # Call the function correctly
-train_ds = get_balanced_dataset(train_ds, num_samples=3000)
+train_ds = get_balanced_dataset(train_ds, target_size=2500)
+print(f"Balanced training size: {len(train_ds)}")
 # Check device
 device = "cuda" if torch.cuda.is_available() else "cpu"
 print(f"Using device: {device}")
@@ -41,10 +65,11 @@ tokenizer.padding_side = "right"
 peft_config = LoraConfig(
     task_type=TaskType.CAUSAL_LM,
     inference_mode=False,
-    r=16,
-    lora_alpha=32,
+    r=32,
+    lora_alpha=64,
     lora_dropout=0.1,
-    target_modules=["c_attn","c_proj", "c_fc"]
+    target_modules=["c_attn","c_proj", "c_fc"],
+    # modules_to_save=["wte", "lm_head"]
 )
 model = get_peft_model(model,peft_config)
 
@@ -87,7 +112,7 @@ print(f"validation size : {len(tokenized_val)}")
 
 training_args = TrainingArguments(
     output_dir="./lora_email_classifier",
-    num_train_epochs=5,              
+    num_train_epochs=3,              
     per_device_train_batch_size=4,   
     per_device_eval_batch_size=8,
     gradient_accumulation_steps=2,   
@@ -102,12 +127,17 @@ training_args = TrainingArguments(
     report_to="none",                
     warmup_steps=100
 )
+def compute_metrics(eval_pred):
+    logits, labels = eval_pred
+    predictions = np.argmax(logits, axis=-1)
+    return {"accuracy": accuracy_score(labels, predictions)}
 
 trainer = Trainer(
     model=model,
     args=training_args,
     train_dataset=tokenized_train,
     eval_dataset=tokenized_val,
+    compute_metrics = compute_metrics
 )
 print(f"starting the training session")
 start_train = time.time()
