@@ -1,9 +1,9 @@
-Model_name,Accuracy,Memory_Testing(MB),Training_Time(min)
+Model_name,Accuracy,Memory_Testing(MB),Training_Time(min.sec)
 GPT2_prompting,18.59,864.64,2.58
 DistilGPT2_prompting,25.47,863.35,1.50
 GPT2_loRa,63.61,1607.89,10.54
-DistilGPT2_lora,65.48,863.35,9.42
-GPT2_loRa_balanced,48.40,//,15.12
-DistilGPT2_lora_balanced,50.03,//,14.06
+DistilGPT2_lora,65.48,1547.01,9.42
+GPT2_loRa_balanced,48.40,1756.45,15.12
+DistilGPT2_lora_balanced,50.03,1568.06,14.06
 Distil_BERT,82.92,2031,8.56
-Distil_BERT_balanced,69.58,//,//
+Distil_BERT_balanced,69.58,2138.64,8.24
