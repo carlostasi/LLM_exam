@@ -6,8 +6,10 @@ import torch
 import time
 
 train_ds, val_ds, test_ds, label_list, label2id, id2label = load_and_prepare_data()
-print("Dati caricati!")
-
+print("loaded data")
+torch.cuda.empty_cache()  
+torch.cuda.reset_peak_memory_stats()
+#to change model write : "gpt2" 
 model_name = "distilgpt2"
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -99,3 +101,5 @@ print(f"Correct: {correct_answer}/{len(test_ds)}")
 print(f"Accuracy: {accuracy:.2f}%")
 print(f"Time: {end_time - start_time:.2f}s")
 print("="*50)
+memory_gb = torch.cuda.max_memory_allocated() / (1024 ** 3) 
+print(f"Memory used: {memory_gb:.3f} GB")

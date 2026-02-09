@@ -23,7 +23,8 @@ torch.manual_seed(SEED)
 # 1. loading data
 train_ds, val_ds, test_ds, label_list, label2id, id2label = datapreparation.load_and_prepare_data()
 print(f"Original Training size: {len(train_ds)}")
-
+torch.cuda.empty_cache() 
+torch.cuda.reset_peak_memory_stats() 
 # manual data augmentation
 def augment_text(text):
     words = text.split()
