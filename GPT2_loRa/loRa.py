@@ -13,7 +13,7 @@ import datapreparation
 from datasets import concatenate_datasets
 
 
-# 1. Load Data using the provided function [cite: 47]
+# 1. Load Data using the provided function 
 train_ds, val_ds, test_ds, label_list, label2id, id2label = datapreparation.load_and_prepare_data()
 print("Original Training size:", len(train_ds))
 
