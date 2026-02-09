@@ -1,0 +1,3 @@
+Model_name,Accuracy(%),Evaluation_Time(sec)
+GPT2,18.59,178
+DistilGPT2,25.47,110
