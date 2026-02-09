@@ -10,16 +10,46 @@ from tqdm import tqdm
 import time
 from datapreparation import load_and_prepare_data
 import datapreparation 
+from tqdm import tqdm
 from datasets import concatenate_datasets
+
+def department_prediction(subject,body):
+    prompt = prompt_format(subject,body,None)
+    inputs = tokenizer(prompt, return_tensors="pt", truncation=True, max_length=512).to(device)
+    outputs = model.generate(**inputs,max_new_tokens=15, pad_token_id=tokenizer.eos_token_id, do_sample=False)
+    generated = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    marker = "Department:"
+    if marker.lower() in generated.lower():
+        answer = generated.lower().split(marker.lower())[-1].strip()
+    else:
+        answer = ""
+    return answer
+
+def departments_match(prediction, valid_labels):
+    pred_lower = prediction.lower().strip()
+    for label in valid_labels:
+        if pred_lower == label.lower():
+            return label
+    for label in valid_labels:
+        if pred_lower.startswith(label.lower()):
+            return label
+    sorted_labels = sorted(valid_labels, key=len, reverse=True)
+    for label in sorted_labels:
+        if label.lower() in pred_lower:
+            return label
+    return None
+
 
 
 # 1. Load Data using the provided function 
 train_ds, val_ds, test_ds, label_list, label2id, id2label = datapreparation.load_and_prepare_data()
 print("Original Training size:", len(train_ds))
-
+torch.cuda.empty_cache() 
+torch.cuda.reset_peak_memory_stats() 
 # Check device
 device = "cuda" if torch.cuda.is_available() else "cpu"
 print(f"Using device: {device}")
+#to change model write : "gpt2" 
 model_name = "gpt2" 
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 #by default is not defined
@@ -107,38 +137,14 @@ start_train = time.time()
 trainer.train()
 train_time = time.time() - start_train
 print(f"Training completed in {train_time:.2f} seconds")
+memory_gb = torch.cuda.max_memory_allocated() / (1024 ** 3) 
 #save the model
 model.save_pretrained("./lora_model_final")
 tokenizer.save_pretrained("./lora_model_final")
+print(f"Memory used: {memory_gb:.3f} GB")
 
-def department_prediction(subject,body):
-    prompt = prompt_format(subject,body,None)
-    inputs = tokenizer(prompt, return_tensors="pt", truncation=True, max_length=512).to(device)
-    outputs = model.generate(**inputs,max_new_tokens=15, pad_token_id=tokenizer.eos_token_id, do_sample=False)
-    generated = tokenizer.decode(outputs[0], skip_special_tokens=True)
-    marker = "Department:"
-    if marker.lower() in generated.lower():
-        answer = generated.lower().split(marker.lower())[-1].strip()
-    else:
-        answer = ""
-    return answer
-
-def departments_match(prediction, valid_labels):
-    pred_lower = prediction.lower().strip()
-    for label in valid_labels:
-        if pred_lower == label.lower():
-            return label
-    for label in valid_labels:
-        if pred_lower.startswith(label.lower()):
-            return label
-    sorted_labels = sorted(valid_labels, key=len, reverse=True)
-    for label in sorted_labels:
-        if label.lower() in pred_lower:
-            return label
-    return None
-
-from tqdm import tqdm
-
+torch.cuda.empty_cache() 
+torch.cuda.reset_peak_memory_stats() 
 correct = 0
 total = len(test_ds)
 predictions = []
@@ -163,4 +169,6 @@ print("="*60)
 print(f"Accuracy: {accuracy:.2f}%")
 print(f"Training time: {train_time:.2f}s ({train_time/60:.1f} min)")
 print("="*60)
+memory_gb = torch.cuda.max_memory_allocated() / (1024 ** 3) 
+print(f"Memory used for evaluation: {memory_gb:.3f} GB")
 
