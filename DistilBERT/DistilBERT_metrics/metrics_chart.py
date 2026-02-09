@@ -5,7 +5,7 @@ import pandas as pd
 
 
 current_dir = os.getcwd()
-file = pd.read_csv(os.path.join(current_dir, "BERT_metrics", "metrics.csv"))
+file = pd.read_csv(os.path.join(current_dir, r"DistilBERT\DistilBERT_metrics", "metrics.csv"))
 
 # Extract features
 experiments = file["Experiment"].unique()
@@ -71,7 +71,7 @@ for bar in bars:
 
 plt.tight_layout()
 plt.savefig(
-    os.path.join(current_dir, "BERT_metrics", "metrics_visualization.png"),
+    os.path.join(current_dir, r"DistilBERT\DistilBERT_metrics", "metrics_visualization.png"),
     dpi=300,
     bbox_inches="tight",
 )

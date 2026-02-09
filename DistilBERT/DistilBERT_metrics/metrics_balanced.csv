@@ -1,0 +1,4 @@
+Epoch,Training_Loss,Validation_Loss,Final_Model_Accuracy
+1,1.16673,0.86168,69.58
+2,0.54731,0.78373,69.58
+3,0.36702,0.77072,69.58

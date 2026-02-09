@@ -6,7 +6,6 @@ from transformers import AutoModelForSequenceClassification, AutoTokenizer, Trai
 from datapreparation import load_and_prepare_data
 from sklearn.metrics import accuracy_score
 
-
 def tokenize_function(elem):
     """
     This function takes an input 'elem', then creates a list of text pairs by combining 
@@ -93,15 +92,24 @@ trainer = Trainer(
 )
 
 print("\nStarting training...")
+
+torch.cuda.empty_cache()
+torch.cuda.reset_peak_memory_stats()
 time_start = time.time()
 trainer.train()
 train_time = time.time() - time_start
+memory_gb = torch.cuda.max_memory_allocated() / (1024 ** 3)
 print(f"\nTraining completed in {train_time:.2f} seconds ({train_time / 60:.2f}) minutes")
+print(f"Memory used: {memory_gb:.3f} GB")
 
 print("\n ==== EVALUATION METRICS ====")
 # Evaluation on test dataset (data that the model had never seen before)
+torch.cuda.empty_cache()
+torch.cuda.reset_peak_memory_stats()
 test_results = trainer.evaluate(tokenized_test)
+memory_gb = torch.cuda.max_memory_allocated() / (1024 ** 3)
 print(f"Accuracy on test dataset: {test_results['eval_accuracy']}")
+print(f"Memory used for evaluation: {memory_gb:.3f} GB")
 
 trainer.save_model("my_final_bert_classifier")
 print("Model saved in 'my_final_bert_classifier'")

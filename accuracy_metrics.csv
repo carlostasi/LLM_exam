@@ -6,3 +6,4 @@ DistilGPT2_lora,65.48
 GPT2_loRa_balanced,48.40
 DistilGPT2_lora_balanced,50.03
 Distil_BERT,82.92
+Distil_BERT_balanced,69.58

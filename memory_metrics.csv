@@ -1,0 +1,6 @@
+Model_name,Memory_Testing(MB)
+GPT2_prompting,864.64
+DistilGPT2_prompting,863.35
+GPT2_loRa,1607.89
+DistilGPT2_lora,1547.01
+Distil_BERT,2031
