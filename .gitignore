@@ -1,2 +1,4 @@
 /__pycache__/
 /lora_email_classifier/
+/distilbert-classifier/
+/my_final_bert_classifier/

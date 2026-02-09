@@ -1,0 +1,87 @@
+-- 1 epoch
+Epoch	 Training Loss	  Validation Loss	Accuracy
+1	       0.973060	         0.880408	    0.655193
+
+Training completed in 125.39 seconds (2.09) minutes
+
+ ==== EVALUTAION METRICS ====
+Accuracy: 0.6759203379601689
+
+-- 2 epoch
+Epoch	 Training Loss	  Validation Loss	Accuracy
+1	      0.965723	         0.856444	    0.664855
+2	      0.767766	         0.795126	    0.695048
+
+Training completed in 173.09 seconds (2.88) minutes
+
+ ==== EVALUTAION METRICS ====
+Accuracy: 0.7030778515389258
+
+-- 3 epoch
+Epoch	 Training Loss	  Validation Loss	Accuracy
+1	       0.974484	          0.861456	    0.653986
+2	       0.763171	          0.748446	    0.718599
+3	       0.662159	          0.711157	    0.746377
+
+Training completed in 252.10 seconds (4.20) minutes
+
+ ==== EVALUTAION METRICS ====
+Accuracy: 0.7423053711526856
+
+-- 4 epoch
+
+Epoch	 Training Loss	  Validation Loss	Accuracy
+1	        0.974723	      0.843862	    0.659420
+2	        0.741439	      0.739990	    0.725845
+3	        0.618532	      0.682341	    0.765097
+4	        0.438017	      0.657953	    0.783816
+
+Training completed in 366.60 seconds (6.11) minutes
+
+ ==== EVALUTAION METRICS ====
+Accuracy: 0.7670488835244418
+
+-- 5 epoch
+
+Epoch	 Training Loss	  Validation Loss	Accuracy
+1	        0.976051	    0.860727	    0.660024
+2	        0.764638	    0.761408	    0.713768
+3	        0.658207	    0.693879	    0.755435
+4	        0.447645	    0.674836	    0.772343
+5	        0.361065	    0.660601	    0.786232
+
+Training completed in 452.39 seconds (7.54) minutes
+
+ ==== EVALUTAION METRICS ====
+Accuracy: 0.7905853952926977
+
+-- 6 epoch
+
+Epoch	Training Loss	 Validation Loss	Accuracy
+1	       0.970777	       0.850652	        0.663043
+2	       0.756967	       0.720162	        0.728865
+3	       0.632509	       0.628854	        0.788647
+4	       0.397374	       0.585310	        0.803744
+5	       0.293687	       0.589570	        0.823671
+6	       0.240912	       0.593967	        0.829710
+
+Training completed in 535.80 seconds (8.93) minutes
+
+ ==== EVALUTAION METRICS ====
+Accuracy on test dataset: 0.8292094146047073
+
+--6 epoch with  metric_for_best_model="eval_loss"
+
+Epoch	Training Loss	Validation Loss	   Accuracy
+1	      0.968888	        0.853011	   0.667874
+2	      0.752446	        0.729425	   0.734300
+3	      0.616377	        0.651099	   0.770531
+4	      0.400002	        0.643714	   0.789251
+5	      0.301704	        0.638828	   0.809783
+6	      0.235700	        0.637149	   0.814010
+
+Training completed in 543.90 seconds (9.06) minutes
+
+ ==== EVALUTAION METRICS ====
+Accuracy on test dataset: 0.8141219070609536
+
