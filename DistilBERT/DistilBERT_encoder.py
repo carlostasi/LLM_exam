@@ -2,7 +2,8 @@ import torch
 import tiktoken
 import numpy as np
 import time
-from transformers import AutoModelForSequenceClassification, AutoTokenizer, Trainer, TrainingArguments
+import random
+from transformers import AutoModelForSequenceClassification, AutoTokenizer, Trainer, TrainingArguments, set_seed
 from datapreparation import load_and_prepare_data
 from sklearn.metrics import accuracy_score
 
@@ -41,6 +42,13 @@ def compute_metrics(eval_pred):
     
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
+OUTPUT_DIR = "./modello_finale_bert"
+SEED_VALUE = 42
+random.seed(SEED_VALUE)
+np.random.seed(SEED_VALUE)
+torch.manual_seed(SEED_VALUE)
+torch.cuda.manual_seed_all(SEED_VALUE)
+set_seed(SEED_VALUE)
 # Here we load the DistilBERT tokenizer
 tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased")
 
@@ -69,7 +77,7 @@ model.to(device)
 
 # --- TRAINING CONFIGURATION ---
 args = TrainingArguments(
-    output_dir="distilbert-classifier",
+    output_dir=OUTPUT_DIR,
     num_train_epochs=5,
     per_device_eval_batch_size=16,
     per_device_train_batch_size=16,
@@ -80,7 +88,9 @@ args = TrainingArguments(
     learning_rate=2e-5,
     # Here we have the reload of the weights of the model that had the best accuracy
     load_best_model_at_end=True,
-    metric_for_best_model="accuracy" # We could choose also "eval_loss"
+    seed=SEED_VALUE,
+    metric_for_best_model="accuracy", # We could choose also "eval_loss"
+    save_total_limit=1
 )
 
 trainer = Trainer(
@@ -93,24 +103,25 @@ trainer = Trainer(
 
 print("\nStarting training...")
 
-torch.cuda.empty_cache()
-torch.cuda.reset_peak_memory_stats()
+# torch.cuda.empty_cache()
+# torch.cuda.reset_peak_memory_stats()
 time_start = time.time()
 trainer.train()
 train_time = time.time() - time_start
-memory_gb = torch.cuda.max_memory_allocated() / (1024 ** 3)
+# memory_gb = torch.cuda.max_memory_allocated() / (1024 ** 3)
 print(f"\nTraining completed in {train_time:.2f} seconds ({train_time / 60:.2f}) minutes")
-print(f"Memory used: {memory_gb:.3f} GB")
+# print(f"Memory used: {memory_gb:.3f} GB")
 
 print("\n ==== EVALUATION METRICS ====")
 # Evaluation on test dataset (data that the model had never seen before)
-torch.cuda.empty_cache()
-torch.cuda.reset_peak_memory_stats()
+# torch.cuda.empty_cache()
+# torch.cuda.reset_peak_memory_stats()
 test_results = trainer.evaluate(tokenized_test)
-memory_gb = torch.cuda.max_memory_allocated() / (1024 ** 3)
+# memory_gb = torch.cuda.max_memory_allocated() / (1024 ** 3)
 print(f"Accuracy on test dataset: {test_results['eval_accuracy']}")
-print(f"Memory used for evaluation: {memory_gb:.3f} GB")
+# print(f"Memory used for evaluation: {memory_gb:.3f} GB")
 
-trainer.save_model("my_final_bert_classifier")
-print("Model saved in 'my_final_bert_classifier'")
+trainer.save_model(OUTPUT_DIR)
+tokenizer.save_pretrained(OUTPUT_DIR)
+
 
